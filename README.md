@@ -42,5 +42,7 @@ Este repositorio es un **portfolio personal DevOps/Cloud**. El objetivo es demos
 - [ ] Phase 4: AWS EC2 + k3s deploy
 
 ---
+<!-- trigger ci -->
+
 
 📌 Autor: AlfreMu
