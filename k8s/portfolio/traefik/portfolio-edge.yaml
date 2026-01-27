@@ -1,15 +1,4 @@
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: strip-api-prefix
-  namespace: portfolio
-spec:
-  stripPrefix:
-    prefixes:
-      - /api
-
----
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: portfolio-edge
@@ -18,14 +7,21 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: PathPrefix(`/api`)
+    # Backend swagger/openapi (rutas reales de FastAPI)
+    - match: PathPrefix(`/docs`) || PathPrefix(`/openapi.json`)
       kind: Rule
       services:
         - name: backend
           port: 8000
-      middlewares:
-        - name: strip-api-prefix
 
+    # Backend API real
+    - match: PathPrefix(`/api/v1`)
+      kind: Rule
+      services:
+        - name: backend
+          port: 8000
+
+    # Frontend
     - match: PathPrefix(`/`)
       kind: Rule
       services:
