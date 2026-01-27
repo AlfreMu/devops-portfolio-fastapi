@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: backend-migrations
+  namespace: portfolio
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: ghcr.io/alfremu/devops-portfolio-fastapi-backend:sha-e701833
+          imagePullPolicy: Always
+          command: ["/bin/sh", "-lc"]
+          args:
+            - |
+              set -e
+              echo "Running Alembic migrations..."
+              cd /app
+              /app/.venv/bin/python -m alembic upgrade head
+              echo "Running initial data..."
+              /app/.venv/bin/python -m app.initial_data
+              echo "✅ migrations + initial_data OK"
+          env:
+            - name: PORT
+              value: "8000"
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secret
