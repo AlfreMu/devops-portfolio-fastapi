@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ghcr.io/AlfreMu/devops-portfolio-fastapi-backend:latest
+          image: ghcr.io/alfremu/devops-portfolio-fastapi-backend:sha-e701833
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
