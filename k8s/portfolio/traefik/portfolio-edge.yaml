@@ -1,0 +1,33 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-api-prefix
+  namespace: portfolio
+spec:
+  stripPrefix:
+    prefixes:
+      - /api
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: portfolio-edge
+  namespace: portfolio
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: PathPrefix(`/api`)
+      kind: Rule
+      services:
+        - name: backend
+          port: 8000
+      middlewares:
+        - name: strip-api-prefix
+
+    - match: PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: frontend
+          port: 80
