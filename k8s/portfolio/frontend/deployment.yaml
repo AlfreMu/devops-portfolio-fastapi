@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/alfremu/devops-portfolio-fastapi-frontend:latest
-          imagePullPolicy: Always
+          image: ghcr.io/alfremu/devops-portfolio-fastapi-frontend:sha-0e1990c8fa4f7b743a96a4602c942c23c6424f6f
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
