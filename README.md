@@ -1,13 +1,15 @@
-# DevOps Portfolio — FastAPI Template (Docker + Kubernetes + CI/CD + AWS)
+![CI](https://github.com/AlfreMu/devops-portfolio-fastapi/actions/workflows/ci.yml/badge.svg) -
+![CD](https://github.com/AlfreMu/devops-portfolio-fastapi/actions/workflows/cd.yml/badge.svg)
+---
 
-![CI](https://github.com/AlfreMu/devops-portfolio-fastapi/actions/workflows/ci.yml/badge.svg)
+# DevOps Portfolio — FastAPI App (Docker + Kubernetes + CI/CD + AWS)
 
 Proyecto de **portfolio DevOps** que demuestra el despliegue completo de una aplicación
 containerizada utilizando **Docker**, **Kubernetes (k3s)**, **CI/CD con GitHub Actions**
-y **despliegue real en AWS**.
+y **despliegue real en AWS (EC2)**.
 
 El foco del proyecto no está en el desarrollo de la aplicación, sino en la **infraestructura,
-automatización, despliegue y buenas prácticas DevOps**.
+automatización, despliegue y prácticas DevOps**.
 
 ---
 
@@ -19,15 +21,20 @@ orquestada en **Kubernetes**, con base de datos **PostgreSQL** persistente.
 El objetivo es demostrar, a nivel **DevOps Jr**, cómo llevar una aplicación desde
 contenedores locales hasta un **cluster Kubernetes en la nube**, incluyendo:
 
-- Contenerización correcta
+- Contenerización con Docker
 - CI funcional
-- Publicación de imágenes
-- Deploy real en AWS
-- Exposición pública mediante Ingress
-- Persistencia de datos
-- Decisiones técnicas explicables en entrevistas
+- Publicación de imágenes en registry
+- Deploy real en AWS (EC2)
+- Exposición pública mediante Ingress (Traefik)
+- Persistencia de datos (PostgreSQL)
 
 ---
+
+## 📚 Documentación
+
+- Kubernetes (k3s en AWS EC2): `docs/kubernetes.md`
+- CI/CD (GitHub Actions + GHCR + deploy a k3s): `docs/ci-cd.md`
+
 
 ## 🏗️ Arquitectura General
 
@@ -39,42 +46,26 @@ La arquitectura del proyecto es la siguiente:
 - **Backend** FastAPI desplegado como Deployment
 - **Frontend** web desplegado como Deployment
 - **PostgreSQL** con volumen persistente (PVC)
-- **Job de Kubernetes** para ejecutar migraciones y datos iniciales
-- **GitHub Container Registry (GHCR)** como registry de imágenes
+- **Job de Kubernetes** para migraciones y datos iniciales
+- **GitHub Container Registry (GHCR)** como registry de imágenes Docker
 
 Todo el tráfico externo ingresa por Traefik y se enruta de la siguiente forma:
 
-- `/` → Frontend
-- `/api` → Backend
-- `/docs` → Swagger (FastAPI)
+- `/` → Frontend web (login)
+- `/docs` → Swagger UI (FastAPI)
+- `/api/v1/utils/health-check` → Backend (health-check)
 
 ---
 
 ## 🧰 Stack Tecnológico
 
-- **Lenguaje / Framework**
-  - Python (FastAPI)
-  - Frontend web (imagen preexistente del template)
-
-- **Contenedores**
-  - Docker
-  - Docker Compose (entorno local)
-
-- **Orquestación**
-  - Kubernetes (k3s)
-  - Deployments, Services, Jobs, Ingress
-
-- **CI/CD**
-  - GitHub Actions
-  - Build de imágenes
-  - Publicación en GHCR
-  - Branch protection y checks
-
-- **Cloud**
-  - AWS EC2 (Ubuntu 22.04)
-
-- **Networking**
-  - Traefik Ingress Controller
+- **Backend:** Python · FastAPI  
+- **Frontend:** Web (template base)
+- **Contenedores:** Docker · Docker Compose (local)
+- **Orquestación:** Kubernetes (k3s)
+- **CI/CD:** GitHub Actions · GHCR
+- **Infraestructura:** AWS EC2 (Ubuntu 22.04)
+- **Networking:** Traefik (Ingress Controller)
 
 ---
 
@@ -85,26 +76,24 @@ Kubernetes local mediante **k3s**.
 
 Características del despliegue:
 
-- Cluster Kubernetes funcional en AWS
-- Imágenes descargadas desde GHCR
-- Servicios internos expuestos vía Ingress
+- Cluster Kubernetes (k3s) funcional en AWS
+- Imágenes Docker descargadas desde GHCR
+- Servicios internos expuestos vía Ingress (Traefik)
 - Datos persistentes incluso tras reinicios de la instancia
 
 ---
 
 ## 🌐 Accesos Públicos
-
 Con la instancia en ejecución, la aplicación queda accesible vía la IP pública de EC2:
 
-- **Frontend:**  
-  `http://<IP_PUBLICA>/`
+- **Frontend:**
+  - `http://54.227.12.89/` (redirige al login)
 
-- **Backend (API):**  
-  `http://<IP_PUBLICA>/api`
+- **Swagger UI (Backend):**
+  - `http://54.227.12.89/docs`
 
-- **Swagger UI:**  
-  `http://<IP_PUBLICA>/docs`
-
+- **Health-check (Backend):**
+  - `http://54.227.12.89/api/v1/utils/health-check`
 ---
 
 ## 🎯 Objetivos del proyecto: 
@@ -122,30 +111,17 @@ Demostrar de forma practica:
 ---
 
 ## 📁 Estructura del Repositorio
-.
-├── k8s/ # Manifiestos de Kubernetes
-│ └── portfolio/
-│ ├── backend/
-│ ├── frontend/
-│ ├── postgres/
-│ └── traefik/
-├── docs/ # Documentación técnica
-├── .github/workflows/ # Pipelines CI/CD
-├── docker-compose.* # Entorno local
+```text
+├── k8s/                      # Manifiestos de Kubernetes
+│   └── portfolio/
+│       ├── backend/
+│       ├── frontend/
+│       ├── postgres/
+│       └── traefik/
+├── docs/                     # Documentación técnica
+├── .github/workflows/        # Pipelines CI/CD
+├── docker-compose.*          # Entorno local
 └── README.md
-
-## 🚧 Estado del Proyecto y Próximos Pasos
-
-Estado actual:
-- ✅ Backend y frontend funcionando en Kubernetes
-- ✅ Persistencia de datos validada
-- ✅ CI y publicación de imágenes
-- ✅ Exposición pública mediante Ingress
-
-Próximas mejoras:
-- Infraestructura como Código (Terraform).
-- HTTPS con certificados TLS.
-- CD, Automatización completa del deploy.
-
+```
 
 📌 Autor: AlfreMu
