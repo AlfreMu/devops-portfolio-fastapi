@@ -1,0 +1,87 @@
+name: CD
+
+on:
+  push:
+    branches: ["master"]
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: ${{ github.repository_owner }}
+  SHA_SHORT: ${{ github.sha }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: backend
+            image: devops-portfolio-fastapi-backend
+            context: ./backend
+          - name: frontend
+            image: devops-portfolio-fastapi-frontend
+            context: ./frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.service.context }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.service.image }}:sha-${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.service.image }}:sha-${{ github.sha }}-${{ github.run_number }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    runs-on: [self-hosted, Linux, X64, ec2-k3s]
+    needs: build-and-push
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to k3s
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Using tags: sha-${GITHUB_SHA}"
+
+          # Backend
+          sudo -n /usr/local/bin/kubectl -n portfolio set image deploy/backend \
+            backend=ghcr.io/${GITHUB_REPOSITORY_OWNER}/devops-portfolio-fastapi-backend:sha-${GITHUB_SHA}
+
+          # Frontend
+          sudo -n /usr/local/bin/kubectl -n portfolio set image deploy/frontend \
+            frontend=ghcr.io/${GITHUB_REPOSITORY_OWNER}/devops-portfolio-fastapi-frontend:sha-${GITHUB_SHA}
+
+          # Run migrations job
+          sudo -n /usr/local/bin/kubectl -n portfolio delete job backend-migrations --ignore-not-found
+          sudo -n /usr/local/bin/kubectl -n portfolio apply -f k8s/portfolio/backend/job-migrations.yaml
+
+          echo "Waiting migrations job..."
+          sudo -n /usr/local/bin/kubectl -n portfolio wait --for=condition=complete job/backend-migrations --timeout=180s
+
+          echo "Rollout status..."
+          sudo -n /usr/local/bin/kubectl -n portfolio rollout status deploy/backend --timeout=180s
+          sudo -n /usr/local/bin/kubectl -n portfolio rollout status deploy/frontend --timeout=180s
+
+          echo "✅ Deploy OK"
