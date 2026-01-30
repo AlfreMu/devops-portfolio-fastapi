@@ -1,7 +1,6 @@
 ![CI](https://github.com/AlfreMu/devops-portfolio-fastapi/actions/workflows/ci.yml/badge.svg) -
 ![CD](https://github.com/AlfreMu/devops-portfolio-fastapi/actions/workflows/cd.yml/badge.svg)
 ---
-
 # DevOps Portfolio — FastAPI App (Docker + Kubernetes + CI/CD + AWS)
 
 Proyecto de **portfolio DevOps** que demuestra el despliegue completo de una aplicación
@@ -12,7 +11,6 @@ El foco del proyecto no está en el desarrollo de la aplicación, sino en la **i
 automatización, despliegue y prácticas DevOps**.
 
 ---
-
 ## Descripción del Proyecto
 
 Este repositorio implementa una aplicación backend en **FastAPI** con frontend web,
@@ -29,13 +27,11 @@ contenedores locales hasta un **cluster Kubernetes en la nube**, incluyendo:
 - Persistencia de datos (PostgreSQL)
 
 ---
-
 ## 📚 Documentación
 
-- Kubernetes (k3s en AWS EC2): `docs/kubernetes.md`
-- CI/CD (GitHub Actions + GHCR + deploy a k3s): `docs/ci-cd.md`
-
-
+- Kubernetes (k3s en AWS EC2): [docs/kubernetes.md](docs/kubernetes.md)
+- CI/CD (GitHub Actions + GHCR + deploy a k3s): [docs/ci-cd.md](docs/ci-cd.md)
+---
 ## 🏗️ Arquitectura General
 
 La arquitectura del proyecto es la siguiente:
